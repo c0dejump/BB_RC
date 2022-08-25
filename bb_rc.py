@@ -47,7 +47,7 @@ def pentesterland(keyword):
 
 
 def openbugbounty(keyword):
-    print(" In progress...")
+    print("   In progress...")
 
 def check_othersites(keyword):
     """
@@ -71,27 +71,31 @@ def google_search(keyword):
 
     for query in queries:
         print(" \033[35m\u251c Query: {}\033[0m".format(query))
-        for j in search(query, tld="com", num=10, stop=10, pause=2.6):
-            try:
-                req_url_found = requests.get(j, verify=False, timeout=5)
-                if req_url_found.status_code not in [404, 408, 503, 405, 428, 412, 429, 403, 401]:
-                    soup = BeautifulSoup(req_url_found.text, "html.parser")
-                    if "hackerone.com/reports/" in j:
-                        found_report = True
-                        print("   \033[32m[{}]\033[0m {}".format(req_url_found.status_code, j))
-                        get_report_title_h1(req_url_found, soup)
-                    elif "bugcrowd.com/disclosures/" in j:
-                        print("   \033[32m[{}]\033[0m {}".format(req_url_found.status_code, j))
+        try:
+            for j in search(query, tld="com", num=10, stop=10, pause=2.6):
+                try:
+                    req_url_found = requests.get(j, verify=False, timeout=5)
+                    if req_url_found.status_code not in [404, 408, 503, 405, 428, 412, 429, 403, 401]:
+                        soup = BeautifulSoup(req_url_found.text, "html.parser")
+                        if "hackerone.com/reports/" in j:
+                            found_report = True
+                            print("   \033[32m[{}]\033[0m {}".format(req_url_found.status_code, j))
+                            get_report_title_h1(req_url_found, soup)
+                        elif "bugcrowd.com/disclosures/" in j:
+                            print("   \033[32m[{}]\033[0m {}".format(req_url_found.status_code, j))
+                        else:
+                            other_links.append("  {} {}".format(req_url_found.status_code, j))
+                    elif req_url_found.status_code in [403, 401]:
+                        other_links.append("  {} {}".format(req_url_found.status_code, j))
                     else:
                         other_links.append("  {} {}".format(req_url_found.status_code, j))
-                elif req_url_found.status_code in [403, 401]:
-                    other_links.append("  {} {}".format(req_url_found.status_code, j))
-                else:
-                    other_links.append("  {} {}".format(req_url_found.status_code, j))
-            except:
-                #traceback.print_exc() #DEBUG
-                print(" ! Error with URL {}".format(j))
-        print("")
+                except:
+                    #traceback.print_exc() #DEBUG
+                    print(" ! Error with URL {}".format(j))
+            print("")
+        except:
+            print("  ! Google captcha seem to be activated, try it later...\n")
+            pass
     if not found_report:
         print(" \u251c Seem not report found, other links:")
         for ol in other_links:
@@ -113,5 +117,3 @@ if __name__ == '__main__':
     keyword = results.keyword
     
     google_search(keyword)
-
-
